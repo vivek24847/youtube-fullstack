@@ -1,8 +1,11 @@
 // import { User } from "../models/user.model";
+import mongoose, { Types } from "mongoose";
 import * as Models from "../models/index.js";
 import { ApiError } from "../utils/APIerror.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { ObjectId } from "mongodb"; // Use import instead of require
+
 import {
   checkPassword,
   generateAccessToken,
@@ -16,8 +19,8 @@ const option = { lean: true };
 const registerUser = async (req, res) => {
   try {
     const { username, email, fullName, password } = req.body;
-    console.log("hehebod" , req)
-    console.log("filesss" , req.files)
+    console.log("hehebod", req);
+    console.log("filesss", req.files);
 
     if (
       [username, email, fullName, password].some((field) => field.trim() === "")
@@ -40,11 +43,10 @@ const registerUser = async (req, res) => {
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-    console.log("picsss" ,{avatar , coverImage})
-    
+    console.log("picsss", { avatar, coverImage });
 
-    if(!avatar){
-        throw new ApiError(400 , "Avatar is required")
+    if (!avatar) {
+      throw new ApiError(400, "Avatar is required");
     }
 
     const updatedPassword = await hashPassword(password);
@@ -181,4 +183,128 @@ const changePassword = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, logoutUser, changePassword };
+const getUserChannelProfile = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const channel = await Models.User.aggregate([
+      {
+        $match: {
+          _id: new Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "channel",
+          as: "subscribers",
+        },
+      },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "subscriber",
+          as: "subscribedTo",
+        },
+      },
+      {
+        $addFields: {
+          subscribersCount: {
+            $size: "$subscribers",
+          },
+          channelSubscribedToCount: {
+            $size: "$subscribedTo",
+          },
+          isSubscribed: {
+            $cond: {
+              if: { $in: [req.user, "$subscribers.subscriber"] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          username: 1,
+          email: 1,
+          coverImage: 1,
+          subscribersCount: 1,
+          channelSubscribedToCount: 1,
+          isSubscribed: 1,
+        },
+      },
+    ]);
+
+    if (!channel.length) {
+      throw new ApiError(400, "Channel does not exists");
+    }
+    console.log("sfewwer", channel);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, channel[0], "User channel data shown successfully")
+      );
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send({ message: err });
+  }
+};
+
+const getWatchHistory = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const user = await Models.User.aggregate([
+      {
+        $match:{
+       _id : new mongoose.Types.ObjectId (id)
+      }
+    },{
+      $lookup:{
+        from:"videos" ,
+        localField:"watchHistory",
+        foreignField:"_id",
+        as:"watchHistory",
+        pipeline:[
+          {
+            $lookup:{
+              from:"users" ,
+              localField:"owner",
+              foreignField:"_id",
+              as:"owner",
+              pipeline:[
+                {
+                  $project:{
+                    fullName:1,
+                    username:1,
+                    avatar:1
+                  }
+                }
+              ]
+
+            }
+          }
+        ]
+      }
+    }
+   
+    ]);
+    console.log("userData" , user)
+    return res.status(200).json( new ApiResponse(200 ,user[0].watchHistory , "Watch history fetched successfully" ))
+  } catch (err) {
+    return res.status(400).send({ message: err });
+  }
+
+  
+};
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  changePassword,
+  getUserChannelProfile,
+  getWatchHistory,
+};
