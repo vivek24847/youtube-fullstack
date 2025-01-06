@@ -7,14 +7,14 @@ import {
   getPlaylistById,
   deletPlaylist,
   removeVideoFromPlaylist,
-} from "../controllers/playlist.controller";
+} from "../controllers/playlist.controller.js";
 
 const router = Router();
 
 router.post("/create", createPlayist);
 router.post("/add", addVideoToPlaylist);
-router.get("/playlist", getUserPlaylist);
-router.get("/playlistById", getPlaylistById);
+router.get("/userPlaylist", getUserPlaylist);
+router.get("/:id", getPlaylistById);
 router.delete("/delete", deletPlaylist);
 router.delete("/remove", removeVideoFromPlaylist);
 router.patch("/update", updatePlaylist);

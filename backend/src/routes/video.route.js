@@ -5,14 +5,16 @@ import {
   getVideoById,
   updateVideo,
   publishVideo,
-} from "../controllers/video.controler";
+  togglePublishStatus
+} from "../controllers/video.controler.js";
 
 const router = Router();
 
 router.get("/videos", getAllVideos);
 router.delete("/delete", deleteVideo);
-router.patch("/update", updateVideo);
-router.get("/videoByID", getVideoById);
+router.put("/update", updateVideo);
+router.get("/:id", getVideoById);
 router.post("/add", publishVideo);
+router.put("/publish", togglePublishStatus);
 
 export default router;
