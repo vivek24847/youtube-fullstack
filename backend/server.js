@@ -9,6 +9,7 @@ import videoRouter from "./src/routes/video.route.js"
 import playlistRouter from "./src/routes/playlist.route.js"
 import likeRouter from "./src/routes/like.route.js"
 import commentRouter from "./src/routes/comment.route.js"
+import authenticatedUser from "./src/middlewares/auth.middleware.js";
 
 
 
@@ -26,8 +27,8 @@ connectDb()
     //routes
     app.use("/api/v1/users" , userRouter)
     app.use("/api/v1/like" , likeRouter)
-    app.use("/api/v1/playlist" , playlistRouter)
-    app.use("/api/v1/video" , videoRouter)
+    app.use("/api/v1/playlist" ,authenticatedUser, playlistRouter)
+    app.use("/api/v1/video" , authenticatedUser, videoRouter)
     app.use("/api/v1/comment" , commentRouter)
     app.listen(process.env.PORT, () => {
     	console.log("server is running");
