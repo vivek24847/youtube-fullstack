@@ -2,15 +2,15 @@ import { Router } from "express";
 import {
   addComments,
   deleteComments,
-  getAllComments,
+  getAllCommentsByVideoId,
   updateComments,
 } from "../controllers/comment.controller.js";
 
 const router = Router();
 
 router.post("/add", addComments);
-router.get("/comments", getAllComments);
-router.patch("/edit", updateComments);
+router.get("/:id", getAllCommentsByVideoId);
+router.put("/edit", updateComments);
 router.delete("/delete", deleteComments);
 
 export default router;

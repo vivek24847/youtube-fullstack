@@ -26,10 +26,10 @@ connectDb()
     app.use(cookieParser())
     //routes
     app.use("/api/v1/users" , userRouter)
-    app.use("/api/v1/like" , likeRouter)
+    app.use("/api/v1/like" , authenticatedUser, likeRouter)
     app.use("/api/v1/playlist" ,authenticatedUser, playlistRouter)
     app.use("/api/v1/video" , authenticatedUser, videoRouter)
-    app.use("/api/v1/comment" , commentRouter)
+    app.use("/api/v1/comment" ,authenticatedUser, commentRouter)
     app.listen(process.env.PORT, () => {
     	console.log("server is running");
     });
