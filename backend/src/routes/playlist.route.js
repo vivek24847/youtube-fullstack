@@ -17,6 +17,6 @@ router.get("/userPlaylist", getUserPlaylist);
 router.get("/:id", getPlaylistById);
 router.delete("/delete", deletPlaylist);
 router.delete("/remove", removeVideoFromPlaylist);
-router.patch("/update", updatePlaylist);
+router.put("/update", updatePlaylist);
 
 export default router;
