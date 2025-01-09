@@ -45,9 +45,9 @@ const registerUser = async (req, res) => {
 
     console.log("picsss", { avatar, coverImage });
 
-    if (!avatar) {
-      throw new ApiError(400, "Avatar is required");
-    }
+    // if (!avatar) {
+    //   throw new ApiError(400, "Avatar is required");
+    // }
 
     const updatedPassword = await hashPassword(password);
     console.log("updatedPassword232", updatedPassword);
